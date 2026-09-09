@@ -34,6 +34,9 @@ public class TaskManagerApp {
 			case "list":
 				listTasks(tasks, taskCount);
 				break;
+			case "delete":
+				taskCount = deleteTask(scanner, tasks, taskCount);
+				break;
 			default:
 				System.out.println("Unknown command");
 				break;
@@ -83,8 +86,9 @@ public class TaskManagerApp {
 		System.out.println();
 		System.out.println("Available commands:");
 		System.out.println("create - create a task");
-		System.out.println("list   - show all tasks");
-		System.out.println("exit   - close the program");
+		System.out.println("list - show all tasks");
+		System.out.println("delete - delete a task");
+		System.out.println("exit - close the program");
 	}
 
 	static int removeTask(String[] tasks, int taskCount, int index) {
@@ -100,19 +104,40 @@ public class TaskManagerApp {
 		taskCount--;
 		return taskCount;
 	}
-	
+
 	static int findTaskIndex(String[] tasks, int taskCount, String title) {
-		if(tasks == null || title == null || taskCount <= 0) {
+		if (tasks == null || title == null || taskCount <= 0) {
 			return -1;
 		}
-		
-		for(int i = 0; i < taskCount; ++i) {
-			if(title.equals(tasks[i])) {
+
+		for (int i = 0; i < taskCount; ++i) {
+			if (title.equals(tasks[i])) {
 				return i;
 			}
 		}
-		
+
 		return -1;
+	}
+
+	static int deleteTask(Scanner scanner, String[] tasks, int taskCount) {
+		if (taskCount == 0) {
+			System.out.println("There are no tasks to delete");
+			return taskCount;
+		}
+
+		System.out.println("Please enter the task name:  ");
+		String taskName = scanner.nextLine().strip();
+		int taskIndex = findTaskIndex(tasks, taskCount, taskName);
+
+		if (taskIndex == -1) {
+			System.out.println("Task not found! ");
+			return taskCount;
+		}
+
+		int currentCount = removeTask(tasks, taskCount, taskIndex);
+		System.out.println("Task was successfully removed");
+
+		return currentCount;
 	}
 
 }
