@@ -87,4 +87,18 @@ public class TaskManagerApp {
 		System.out.println("exit   - close the program");
 	}
 
+	static int removeTask(String[] tasks, int taskCount, int index) {
+		if (index < 0 || index >= taskCount) {
+			return taskCount;
+		}
+
+		for (int i = index + 1; i < taskCount; ++i) {
+			tasks[i - 1] = tasks[i];
+		}
+		tasks[taskCount - 1] = null;
+
+		taskCount--;
+		return taskCount;
+	}
+
 }
