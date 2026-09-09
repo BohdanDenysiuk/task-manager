@@ -125,12 +125,12 @@ public class TaskManagerApp {
 			return taskCount;
 		}
 
-		System.out.println("Please enter the task name:  ");
+		System.out.print("Please enter the task name: ");
 		String taskName = scanner.nextLine().strip();
 		int taskIndex = findTaskIndex(tasks, taskCount, taskName);
 
 		if (taskIndex == -1) {
-			System.out.println("Task not found! ");
+			System.out.println("Task not found!");
 			return taskCount;
 		}
 
