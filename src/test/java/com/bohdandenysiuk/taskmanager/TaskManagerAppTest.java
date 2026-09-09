@@ -56,6 +56,52 @@ public class TaskManagerAppTest {
 			assertEquals(3, testVal);
 			assertArrayEquals(expected, values);
 		}
+		
+		@Test 
+		void findTaskIndexFindsExistingTask() {
+			String[] values = {"A", "B", "C", null};
+			int testVal = TaskManagerApp.findTaskIndex(values, 3, "B");
+			
+			assertEquals(1, testVal);
+		}
+		
+		@Test 
+		void findTaskIndexReturnsMinusOneForMissingTask() {
+			String[] values = {"A", "B", "C", null};
+			int testVal = TaskManagerApp.findTaskIndex(values, 3, "D");
+			
+			assertEquals(-1, testVal);
+		}
+		
+		@Test 
+		void findTaskIndexReturnsMinusOneForNullArray() {
+			String[] values = null;
+			int testVal = TaskManagerApp.findTaskIndex(values, 0, "A");
+			
+			assertEquals(-1, testVal);
+		}
+		
+		@Test 
+		void findTaskIndexReturnsMinusOneForNullTitle() {
+			String[] values = {"A", "B"};
+			int testVal = TaskManagerApp.findTaskIndex(values, 2, null);
+			
+			assertEquals(-1, testVal);
+		}
+		
+		@Test
+		void findTaskIndexIgnoresElementsOutsideLogicalSize() {
+			String[] values = {"A", "B", "hidden"};
+			int testVal = TaskManagerApp.findTaskIndex(values, 2, "hidden");
+			
+			assertEquals(-1, testVal);
+		}
+		
+		
+		
+		
+		
+		
 
 
 }

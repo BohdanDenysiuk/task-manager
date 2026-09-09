@@ -100,5 +100,19 @@ public class TaskManagerApp {
 		taskCount--;
 		return taskCount;
 	}
+	
+	static int findTaskIndex(String[] tasks, int taskCount, String title) {
+		if(tasks == null || title == null || taskCount <= 0) {
+			return -1;
+		}
+		
+		for(int i = 0; i < taskCount; ++i) {
+			if(title.equals(tasks[i])) {
+				return i;
+			}
+		}
+		
+		return -1;
+	}
 
 }
