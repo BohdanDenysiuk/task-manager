@@ -5,12 +5,18 @@ public class TaskManager {
 	private static final int DEFAULT_CAPACITY = 10;
 	private final Task[] tasks;
 	private int taskCount;
+	private final TaskMatcher taskMatcher;
 
-	public TaskManager(int capacity) {
+	public TaskManager(int capacity, TaskMatcher taskMatcher) {
 		if (capacity < 0) {
 			capacity = 0;
 		}
 		this.tasks = new Task[capacity];
+		this.taskMatcher = taskMatcher;
+	}
+
+	public TaskManager(int capacity) {
+		this(capacity, new ExactTitleMatcher());
 	}
 
 	public TaskManager() {
@@ -82,7 +88,7 @@ public class TaskManager {
 		}
 
 		for (int i = 0; i < taskCount; ++i) {
-			if (tasks[i].getTitle().equals(title)) {
+			if (taskMatcher.matches(tasks[i], title)) {
 				return i;
 			}
 		}
