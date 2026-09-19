@@ -156,4 +156,42 @@ public class TaskManagerTest {
 		assertEquals(2, test.countDoneTasks());
 	}
 
+	@Test
+	void defaultMatcherUsesExactComparison() {
+		TaskManager manager = new TaskManager();
+		manager.addTask("Learn Java");
+
+		assertSame(manager.getTask(0), manager.findTask("Learn Java"));
+		assertNull(manager.findTask("learn java"));
+	}
+
+	@Test
+	void caseInsensitiveMatcherIgnoresLetterCase() {
+		TaskManager manager = new TaskManager(10, new CaseInsensitiveTitleMatcher());
+		manager.addTask("Learn Java");
+		Task original = manager.getTask(0);
+
+		assertSame(original, manager.findTask("LEARN JAVA"));
+
+	}
+
+	@Test
+	void completeTaskUsesConfiguredMatcher() {
+		TaskManager manager = new TaskManager(10, new CaseInsensitiveTitleMatcher());
+		manager.addTask("Learn Java");
+		assertTrue(manager.completeTask("LEARN JAVA"));
+		assertTrue(manager.getTask(0).isDone());
+	}
+
+	@Test
+	void removeTaskUsesConfiguredMatcher() {
+		TaskManager manager = new TaskManager(10, new CaseInsensitiveTitleMatcher());
+		manager.addTask("Learn Java");
+		assertTrue(manager.removeTask("LEARN JAVA"));
+
+		assertNull(manager.getTask(0));
+		assertEquals(0, manager.getTaskCount());
+
+	}
+
 }
