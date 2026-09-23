@@ -8,8 +8,9 @@ public class TaskManager {
 	private final TaskMatcher taskMatcher;
 
 	public TaskManager(int capacity, TaskMatcher taskMatcher) {
-		if (capacity < 0) {
-			capacity = 0;
+		if (capacity < 0 || taskMatcher == null) {
+			throw new IllegalArgumentException(
+					"Error was encountered while creating an object( check submitted capacity and taskMatcher values)!");
 		}
 		this.tasks = new Task[capacity];
 		this.taskMatcher = taskMatcher;

@@ -2,9 +2,10 @@ package com.bohdandenysiuk.taskmanager;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -19,11 +20,19 @@ public class TaskManagerTest {
 	}
 
 	@Test
-	void negativeCapacityBecomesZero() {
-		TaskManager test = new TaskManager(-5);
+	void negativeCapacityThrowsException() {
+		assertThrows(IllegalArgumentException.class, () -> new TaskManager(-5));
+	}
 
-		assertEquals(0, test.getCapacity());
-		assertFalse(test.addTask("Task"));
+	@Test
+	void nullTaskMatcherThrowsException() {
+		assertThrows(IllegalArgumentException.class, () -> new TaskManager(10, null));
+	}
+
+	@Test
+	void zeroCapacityIsValid() {
+		TaskManager manager = new TaskManager(0);
+		assertEquals(0, manager.getCapacity());
 	}
 
 	@Test
