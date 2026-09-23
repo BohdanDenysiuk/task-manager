@@ -6,6 +6,9 @@ public class Task {
 	private boolean done;
 
 	public Task(String title) {
+		if (title == null || title.isBlank()) {
+			throw new IllegalArgumentException("Title cannot be empty or equal null!");
+		}
 		this.done = false;
 		this.title = title;
 	}
