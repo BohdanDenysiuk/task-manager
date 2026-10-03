@@ -1,12 +1,16 @@
 package com.bohdandenysiuk.taskmanager;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Task {
 
 	private final String title;
-	private boolean done;
+	private TaskStatus status;
 	private final Long id;
 	private final Long projectId;
 	private Long assigneeId;
+	private final List<String> history;
 
 	public Task(String title) {
 		if (title == null || title.isBlank()) {
@@ -15,8 +19,10 @@ public class Task {
 		this.id = null;
 		this.projectId = null;
 		this.assigneeId = null;
-		this.done = false;
+		this.status = TaskStatus.TODO;
 		this.title = title;
+		this.history = new ArrayList<>();
+		this.history.add("CREATED");
 	}
 
 	public Task(long id, String title, long projectId) {
@@ -29,15 +35,25 @@ public class Task {
 		this.title = title.trim();
 		this.projectId = projectId;
 		this.assigneeId = null;
-		this.done = false;
+		this.status = TaskStatus.TODO;
+		this.history = new ArrayList<>();
+		this.history.add("CREATED");
+	}
+
+	public List<String> getHistory() {
+		return new ArrayList<>(history);
 	}
 
 	public String getTitle() {
 		return title;
 	}
 
+	public TaskStatus getStatus() {
+		return status;
+	}
+
 	public boolean isDone() {
-		return done;
+		return this.status == TaskStatus.DONE;
 	}
 
 	public Long getId() {
@@ -53,7 +69,10 @@ public class Task {
 	}
 
 	public void markDone() {
-		this.done = true;
+		if (!isDone()) {
+			this.status = TaskStatus.DONE;
+			history.add("COMPLETED");
+		}
 	}
 
 	public boolean isAssigned() {
@@ -65,11 +84,29 @@ public class Task {
 			throw new IllegalArgumentException("User id must be positive");
 		}
 
+		if (assigneeId != null && userId == assigneeId) {
+			return;
+		}
+
 		this.assigneeId = userId;
+		this.history.add("ASSIGNED: " + userId);
+
 	}
 
 	public void unassign() {
-		this.assigneeId = null;
+		if (this.assigneeId != null) {
+			this.assigneeId = null;
+			this.history.add("UNASSIGNED");
+		}
 	}
 
+	public boolean start() {
+		if (this.status == TaskStatus.TODO) {
+			status = TaskStatus.IN_PROGRESS;
+			this.history.add("STARTED");
+			return true;
+		}
+
+		return false;
+	}
 }

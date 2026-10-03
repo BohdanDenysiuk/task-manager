@@ -60,4 +60,16 @@ public class TaskService {
 		task.markDone();
 		return true;
 	}
+
+	public boolean startTask(long taskId) {
+		if (taskId <= 0) {
+			return false;
+		}
+
+		Task task = this.taskRepository.findById(taskId);
+		if (task != null) {
+			return task.start();
+		}
+		return false;
+	}
 }

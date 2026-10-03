@@ -93,4 +93,40 @@ public class RepositoryServiceTest {
 		assertFalse(service.completeTask(1000));
 		assertFalse(service.completeTask(999));
 	}
+
+	@Test
+	void serviceLifecycleRecordsHistory() {
+		UserRepository users = new InMemoryUserRepository();
+		ProjectRepository projects = new InMemoryProjectRepository();
+		TaskRepository tasks = new InMemoryTaskRepository();
+		TaskService service = new TaskService(tasks, projects, users);
+		users.save(new User(1L, "Oleksii"));
+		projects.save(new Project(15L, "PR1", 1L));
+
+		assertTrue(service.createTask(28L, "Learn Maven", 15L));
+		assertTrue(service.assignTask(28L, 1L));
+		assertTrue(service.startTask(28L));
+		assertTrue(service.completeTask(28L));
+		assertEquals(TaskStatus.DONE, tasks.findById(28L).getStatus());
+		assertEquals(List.of("CREATED", "ASSIGNED: 1", "STARTED", "COMPLETED"), tasks.findById(28L).getHistory());
+	}
+
+	@Test
+	void failedServiceOperationsDoNotChangeTask() {
+		UserRepository users = new InMemoryUserRepository();
+		ProjectRepository projects = new InMemoryProjectRepository();
+		TaskRepository tasks = new InMemoryTaskRepository();
+		TaskService service = new TaskService(tasks, projects, users);
+		users.save(new User(1L, "Oleksii"));
+		projects.save(new Project(15L, "PR1", 1L));
+		assertTrue(service.createTask(28L, "Learn Maven", 15L));
+		assertFalse(service.startTask(0));
+		assertFalse(service.startTask(-1));
+		assertFalse(service.startTask(999));
+		assertFalse(service.assignTask(28L, 30L));
+		assertEquals(TaskStatus.TODO, tasks.findById(28L).getStatus());
+		assertFalse(tasks.findById(28L).isAssigned());
+		assertEquals(List.of("CREATED"), tasks.findById(28L).getHistory());
+	}
+
 }
