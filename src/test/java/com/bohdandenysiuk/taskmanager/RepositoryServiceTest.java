@@ -4,9 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
@@ -127,6 +130,122 @@ public class RepositoryServiceTest {
 		assertEquals(TaskStatus.TODO, tasks.findById(28L).getStatus());
 		assertFalse(tasks.findById(28L).isAssigned());
 		assertEquals(List.of("CREATED"), tasks.findById(28L).getHistory());
+	}
+
+	@Test
+	void taskWithoutId() {
+		TaskRepository tasks = new InMemoryTaskRepository();
+		assertFalse(tasks.save(null));
+		assertFalse(tasks.save(new Task("Legacy task")));
+		assertEquals(0, tasks.findAll().size());
+	}
+
+	@Test
+	void repositoryIndependance() {
+		UserRepository users1 = new InMemoryUserRepository();
+		UserRepository users2 = new InMemoryUserRepository();
+
+		User user = new User(5, "Task");
+		users1.save(user);
+		assertSame(user, users1.findById(5));
+		assertNull(users2.findById(5));
+	}
+
+	@Test
+	void sortingAndIndependanceOfList() {
+		UserRepository users1 = new InMemoryUserRepository();
+		Comparator<User> byId = (left, right) -> Long.compare(left.getId(), right.getId());
+
+		User user1 = new User(9, "Task");
+		User user2 = new User(2, "Task");
+		User user3 = new User(5, "Task");
+		users1.save(user1);
+		users1.save(user2);
+		users1.save(user3);
+
+		List<User> sorted = users1.findAllSorted(byId);
+
+		assertEquals(List.of(user2, user3, user1), sorted);
+		assertEquals(List.of(user1, user2, user3), users1.findAll());
+
+		assertSame(user2, sorted.get(0));
+
+		sorted.clear();
+
+		assertTrue(sorted.isEmpty());
+		assertEquals(List.of(user1, user2, user3), users1.findAll());
+
+	}
+
+	@Test
+	void emptyRepository() {
+		UserRepository users1 = new InMemoryUserRepository();
+		Comparator<User> byId = (left, right) -> Long.compare(left.getId(), right.getId());
+
+		assertEquals(List.of(), users1.findAllSorted(byId));
+	}
+
+	@Test
+	void absentComparator() {
+		UserRepository users1 = new InMemoryUserRepository();
+		assertThrows(IllegalArgumentException.class, () -> users1.findAllSorted(null));
+	}
+
+	@Test
+	void emptyStatusRepository() {
+		UserRepository users = new InMemoryUserRepository();
+		ProjectRepository projects = new InMemoryProjectRepository();
+		TaskRepository tasks = new InMemoryTaskRepository();
+		TaskService service = new TaskService(tasks, projects, users);
+
+		Map<TaskStatus, Integer> map = service.countTasksByStatus();
+
+		assertEquals(0, map.get(TaskStatus.DONE));
+		assertEquals(0, map.get(TaskStatus.IN_PROGRESS));
+		assertEquals(0, map.get(TaskStatus.TODO));
+	}
+
+	@Test
+	void differentStatus() {
+		UserRepository users = new InMemoryUserRepository();
+		ProjectRepository projects = new InMemoryProjectRepository();
+		TaskRepository tasks = new InMemoryTaskRepository();
+		TaskService service = new TaskService(tasks, projects, users);
+
+		Task user1 = new Task(5L, "Learn Java", 9L);
+		Task user2 = new Task(7L, "Learn Java", 9L);
+		Task user3 = new Task(9L, "Learn Java", 9L);
+		Task user4 = new Task(11L, "Learn Java", 9L);
+
+		tasks.save(user1);
+		tasks.save(user2);
+		tasks.save(user3);
+		tasks.save(user4);
+
+		user1.markDone();
+		user2.start();
+
+		Map<TaskStatus, Integer> map1 = service.countTasksByStatus();
+
+		assertEquals(1, map1.get(TaskStatus.DONE));
+		assertEquals(1, map1.get(TaskStatus.IN_PROGRESS));
+		assertEquals(2, map1.get(TaskStatus.TODO));
+
+		user3.start();
+
+		Map<TaskStatus, Integer> map2 = service.countTasksByStatus();
+
+		assertEquals(1, map2.get(TaskStatus.DONE));
+		assertEquals(2, map2.get(TaskStatus.IN_PROGRESS));
+		assertEquals(1, map2.get(TaskStatus.TODO));
+
+		map2.clear();
+
+		Map<TaskStatus, Integer> map3 = service.countTasksByStatus();
+
+		assertEquals(1, map3.get(TaskStatus.DONE));
+		assertEquals(2, map3.get(TaskStatus.IN_PROGRESS));
+		assertEquals(1, map3.get(TaskStatus.TODO));
 	}
 
 }
