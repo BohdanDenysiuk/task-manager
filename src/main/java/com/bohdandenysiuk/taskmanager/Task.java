@@ -109,4 +109,26 @@ public class Task {
 
 		return false;
 	}
+
+	public static Task restore(long id, String title, long projectId, TaskStatus status, Long assigneeId,
+			List<String> history) {
+		if (title == null || title.isBlank() || status == null || history == null || history.isEmpty() || (assigneeId != null && assigneeId <= 0)
+				|| id <= 0 || projectId <= 0) {
+			throw new IllegalArgumentException("Error by restoring");
+		}
+
+		Task newTask = new Task(id, title, projectId);
+		newTask.status = status;
+		newTask.assigneeId = assigneeId;
+		newTask.history.clear();
+		for (String event : history) {
+			if (event == null || event.isBlank()) {
+				throw new IllegalArgumentException("Error by restoring");
+			}
+
+			newTask.history.add(event);
+		}
+
+		return newTask;
+	}
 }
